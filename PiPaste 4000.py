@@ -125,8 +125,12 @@ class CardSplitterApp:
         btns_frame.grid(row=2, column=0, sticky="ew", pady=(10,0))
         btns_frame.columnconfigure(0, weight=1)
         btns_frame.columnconfigure(1, weight=0)
-        clear_btn = ttk.Button(btns_frame, text="Clear Input", command=self.clear_input, style="Nav.TButton")
-        clear_btn.grid(row=0, column=0, sticky="w")
+        left_col = ttk.Frame(btns_frame, style="TFrame")
+        left_col.grid(row=0, column=0, sticky="w")
+        clear_btn = ttk.Button(left_col, text="Clear Input", command=self.clear_input, style="Nav.TButton")
+        clear_btn.grid(row=0, column=0, sticky="w", padx=(0,6))
+        paste_btn = ttk.Button(left_col, text="Paste", command=self.paste_input, style="Nav.TButton")
+        paste_btn.grid(row=0, column=1, sticky="w")
         nav_col = ttk.Frame(btns_frame, style="TFrame")
         nav_col.grid(row=0, column=1, sticky="e", padx=(6,0))
         nav_col.columnconfigure(0, weight=0)
@@ -203,15 +207,60 @@ class CardSplitterApp:
         self.root.geometry(f"{w}x{h}+{x}+{y}")
 
     def clear_input(self):
-        self.input_text.delete("1.0", "end")
-        self.input_text.insert("1.0", self.placeholder_text)
-        self.input_text.tag_add("ph", "1.0", "end")
-        self.input_placeholder = True
+        if self._after_id:
+            try:
+                self.root.after_cancel(self._after_id)
+            except Exception:
+                pass
+            self._after_id = None
+        try:
+            self.root.clipboard_clear()
+            self.root.update()
+        except Exception:
+            pass
+        try:
+            self.input_text.delete("1.0", "end")
+        except Exception:
+            pass
+        try:
+            self.input_text.insert("1.0", self.placeholder_text)
+            self.input_text.tag_add("ph", "1.0", "end")
+            self.input_placeholder = True
+        except Exception:
+            self.input_placeholder = True
         self.cards = []
         self.index = 0
         self.update_display()
         self.update_counts()
-        self.show_alert("Cleared input", "#bfbfbf")
+        self.show_alert("Cleared input and clipboard", "#bfbfbf")
+
+    def paste_input(self):
+        try:
+            txt = self.root.clipboard_get()
+        except Exception:
+            txt = ""
+        if txt:
+            if self.input_placeholder:
+                try:
+                    self.input_text.delete("1.0", "end")
+                except Exception:
+                    pass
+                try:
+                    self.input_text.tag_remove("ph", "1.0", "end")
+                except Exception:
+                    pass
+                self.input_placeholder = False
+            try:
+                self.input_text.insert("insert", txt)
+            except Exception:
+                try:
+                    self.input_text.insert("1.0", txt)
+                except Exception:
+                    pass
+            self._on_input_change()
+            self.show_alert("Pasted from clipboard", "#bfbfbf")
+        else:
+            self.show_alert("Clipboard empty", "#f0a070")
 
     def _on_input_change(self, event=None):
         if self.input_placeholder:
@@ -415,6 +464,9 @@ class CardSplitterApp:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    root.iconbitmap("favicon.ico")
+    try:
+        root.iconbitmap("favicon.ico")
+    except Exception:
+        pass
     app = CardSplitterApp(root)
     root.mainloop()
