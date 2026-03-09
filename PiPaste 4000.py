@@ -129,10 +129,12 @@ class CardSplitterApp:
         clear_btn.grid(row=0, column=0, sticky="w")
         nav_col = ttk.Frame(btns_frame, style="TFrame")
         nav_col.grid(row=0, column=1, sticky="e", padx=(6,0))
-        up_btn = ttk.Button(nav_col, text="▲", command=self.prev_card, width=6, style="Nav.TButton")
-        up_btn.pack(fill="x", pady=(0,8))
-        down_btn = ttk.Button(nav_col, text="▼", command=self.next_card, width=6, style="Nav.TButton")
-        down_btn.pack(fill="x")
+        nav_col.columnconfigure(0, weight=0)
+        nav_col.columnconfigure(1, weight=0)
+        first_btn = ttk.Button(nav_col, text="1st Card 📍", command=self.first_card, width=12, style="Nav.TButton")
+        first_btn.grid(row=0, column=0, padx=(0,6))
+        next_btn = ttk.Button(nav_col, text="Next Card ➤", command=self.next_card, width=12, style="Nav.TButton")
+        next_btn.grid(row=0, column=1)
         info_frame = ttk.Frame(ui_frame, style="TFrame")
         info_frame.grid(row=3, column=0, sticky="ew", pady=(10,0))
         self.input_count_label = ttk.Label(info_frame, text="Input chars: 0", style="Count.TLabel")
@@ -387,6 +389,18 @@ class CardSplitterApp:
             self.show_alert(f"Auto copy on card {self.index+1}", "#7fe08a")
         else:
             self.show_alert("Already at last card", "#f0a070")
+
+    def first_card(self):
+        if not self.cards:
+            self.show_alert("No cards loaded", "#f0a070")
+            return
+        if self.index != 0:
+            self.index = 0
+            self.update_display()
+            self.copy_to_clipboard(self.cards[self.index])
+            self.show_alert("Auto copy on card 1", "#7fe08a")
+        else:
+            self.show_alert("Already at first card", "#f0a070")
 
     def show_alert(self, msg, color=None):
         self.alert_label.config(text=msg)

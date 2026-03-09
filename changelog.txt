@@ -1,0 +1,3 @@
+March 09, 2026:
+> This app created, the purpose is because Raspberry Pi have limited paste (4000 characters)
+> Changed from up and down button to "1st Card" and "Next Card" button. Prev button will be planning if it needs to add or nah
